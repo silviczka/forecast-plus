@@ -11,28 +11,31 @@ import { useKeyboardNavigation } from '@/hooks/keyboardNav';
 import { useWeather } from '@/hooks/useWeather';
 
 export default function Home() {
-  const [query, setQuery] = useState('Prague');
+  const [query, setQuery] = useState('');
   const [city, setCity] = useState('Prague'); // selected city
+  const [country, setCountry] = useState('Czechia');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [debouncedQuery] = useDebounce(query, 300); // wait 300ms after typing
-
-  const { data, error, loading } = useWeather(city);
+  const { data, error, loading } = useWeather(city, country);
   const { display, search } = getWeatherKeywords(data);
 
   useEffect(() => {
     const fetch = async () => {
       if (!debouncedQuery) return setSuggestions([]);
-      if (debouncedQuery === city) return setSuggestions([]);
+      if (debouncedQuery === `${city}, ${country}`) return setSuggestions([]);
 
       const results = await fetchSuggestions(debouncedQuery);
       setSuggestions(results);
     };
     fetch();
-  }, [debouncedQuery, city]);
+  }, [debouncedQuery, city, country]);
 
+  useEffect(() => {}, [query]);
   const handleSelect = (s: Suggestion) => {
     setCity(s.name);
-    setQuery(s.name);
+    setCountry(s.country);
+    setQuery(s.name + ', ' + s.country);
+
     setSuggestions([]);
   };
   const { activeIndex, handleKeyDown } = useKeyboardNavigation(

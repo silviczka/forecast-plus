@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { devOnly } from '@/lib/devonly';
 
-export function useWeather(city: string) {
+export function useWeather(city: string, country: string) {
   const [data, setData] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -14,7 +14,9 @@ export function useWeather(city: string) {
       setLoading(true);
       try {
         const res = await axios.get(
-          `/api/weather?city=${encodeURIComponent(city)}`,
+          `/api/weather?city=${encodeURIComponent(city)}${
+            country ? `&country=${encodeURIComponent(country)}` : ''
+          }`,
         );
         setData(res.data);
         setError(null);
@@ -28,7 +30,7 @@ export function useWeather(city: string) {
     };
 
     fetchWeather();
-  }, [city]);
+  }, [city, country]);
 
   return { data, error, loading };
 }

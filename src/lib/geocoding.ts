@@ -9,6 +9,7 @@ export const fetchSuggestions = async (query: string) => {
       )}&count=10&language=en&format=json`,
     );
     const data = await res.json();
+    console.log(data.results);
     return data.results || [];
   } catch (err) {
     devOnly(() => console.error('Failed to fetch suggestions', err));
