@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { getWeatherKeywords } from '@/lib/weatherKeywords';
-import { devOnly } from '@/lib/devonly';
+import { logProd } from '@/lib/logProd';
 
 export default function GiphyDisplay({ weatherData }: WeatherDataProps) {
   const [selectedGif, setSelectedGif] = useState<Gif | null>(null);
@@ -30,7 +30,7 @@ export default function GiphyDisplay({ weatherData }: WeatherDataProps) {
           setSelectedGif(null);
         }
       } catch (err) {
-        devOnly(() => console.error(err));
+        logProd(`Failed to fetch Giphy GIFs for query="${search}":`, err);
       }
     };
 

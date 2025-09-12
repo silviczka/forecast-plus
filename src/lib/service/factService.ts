@@ -15,6 +15,7 @@ import {
 import { checkLocalRateLimit } from '../fallbackFunFacts/localRateLimit';
 import { ensureRedisUp } from './redisService';
 import { devOnly } from '../devonly';
+import { logProd } from '../logProd';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -38,26 +39,15 @@ export async function getFactForKeyword(ip: string, keyword: string) {
     try {
       allowed = await checkRateLimitRedis(ip);
     } catch (err: unknown) {
-      devOnly(() => {
-        if (err instanceof Error) {
-          console.error(
-            'Redis unavailable for rate limit, using local buffer:',
-            err.message,
-          );
-        } else {
-          console.error(
-            'Redis unavailable for rate limit, unknown error:',
-            err,
-          );
-        }
-      });
+      logProd('Redis unavailable for rate limit, using local fallback:', err);
       allowed = checkLocalRateLimit(ip, 3, 60 * 60 * 1000); // fallback
     }
   } else {
-    allowed = checkLocalRateLimit(ip, 3, 60 * 60 * 1000);
+    allowed = false;
   }
 
   if (!allowed) {
+    logProd(`Fun fact rate-limited for IP ${ip}, keyword "${keyword}"`);
     const fact = redisUp
       ? await getRedisFallbackFact(keyword, ip)
       : getLocalFallbackFact(ip);
@@ -71,13 +61,7 @@ export async function getFactForKeyword(ip: string, keyword: string) {
       const cached = await redis.get(cacheKey);
       if (cached) return { text: cached, rateLimited: false };
     } catch (err: unknown) {
-      devOnly(() => {
-        if (err instanceof Error) {
-          console.error('Redis cache get failed:', err.message);
-        } else {
-          console.error('Redis cache get failed with unknown error:', err);
-        }
-      });
+      logProd('Redis cache get failed:', err);
     }
   }
 
@@ -86,7 +70,7 @@ export async function getFactForKeyword(ip: string, keyword: string) {
   let fromOpenAI = false;
   try {
     const prompt = `Generate a short fun fact or "Did you know..." style message about ${keyword}. Make it 1-2 complete sentences, simple, friendly. Make each response feel unique, interesting, and playful. Try to make each fact unique, you can speak of books, movies, songs, known people, animals, clothes, anything that comes to mind in connection with weather and ${keyword}. Ensure the sentences are fully finished and make sense on its own, always ending with proper punctuation.`;
-    devOnly(() => console.log('OPEN AI API CALL'));
+    logProd('OPENAI API CALL for keyword:', keyword);
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
@@ -94,15 +78,10 @@ export async function getFactForKeyword(ip: string, keyword: string) {
     });
     text = response.choices?.[0]?.message?.content?.trim() ?? '';
     if (!/[.!?]$/.test(text)) text += '.';
+    logProd(`Fun fact for keyword "${keyword}" fetched:`, text);
     fromOpenAI = true;
   } catch (err: unknown) {
-    devOnly(() => {
-      if (err instanceof Error) {
-        console.error('OpenAI failed, using local fallback:', err.message);
-      } else {
-        console.error('OpenAI failed with unknown error:', err);
-      }
-    });
+    logProd('OpenAI call failed, using local fallback:', err);
     text = getLocalFallbackFact(ip);
   }
 
@@ -111,32 +90,14 @@ export async function getFactForKeyword(ip: string, keyword: string) {
     try {
       await redis.set(cacheKey, text, 'EX', 60 * 60);
     } catch (err: unknown) {
-      devOnly(() => {
-        if (err instanceof Error) {
-          console.error('Redis cache set failed:', err.message);
-        } else {
-          console.error('Redis cache set failed with unknown error:', err);
-        }
-      });
+      logProd('Redis cache set failed:', err);
     }
 
     if (fromOpenAI) {
       try {
         await addRedisFallbackFact(keyword, text);
       } catch (err: unknown) {
-        devOnly(() => {
-          if (err instanceof Error) {
-            console.error(
-              'Redis fallback store failed, saving to buffer:',
-              err.message,
-            );
-          } else {
-            console.error(
-              'Redis fallback store failed with unknown error:',
-              err,
-            );
-          }
-        });
+        logProd('Redis fallback store failed', err);
         devOnly(() => saveToLocalBuffer(keyword, text));
       }
     }

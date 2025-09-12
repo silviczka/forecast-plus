@@ -1,7 +1,7 @@
-import { devOnly } from './devonly';
+import { logProd } from './logProd';
 import redis from './redis';
 
-const LIMIT = 3;
+const LIMIT = 7;
 const WINDOW = 60 * 60; // seconds for Redis
 
 export async function checkRateLimitRedis(ip: string) {
@@ -19,8 +19,8 @@ export async function checkRateLimitRedis(ip: string) {
 
     return true;
   } catch (err) {
-    devOnly(() => console.error('Redis error, skipping rate limit:', err));
+    logProd(`Redis error for IP="${ip}", skipping rate limit:`, err);
 
-    return true; // allow request if Redis fails
+    return false; // switch to localFacts when redis down
   }
 }

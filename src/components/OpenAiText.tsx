@@ -1,4 +1,4 @@
-import { devOnly } from '@/lib/devonly';
+import { logProd } from '@/lib/logProd';
 import { useEffect, useState } from 'react';
 
 export default function WeatherFunFact({ keyword }: { keyword: string }) {
@@ -23,7 +23,7 @@ export default function WeatherFunFact({ keyword }: { keyword: string }) {
         setFact(data.text);
         setLastKeyword(keyword);
       } catch (err) {
-        devOnly(() => console.error(err));
+        logProd(`Failed to fetch fun fact for keyword="${keyword}":`, err);
       } finally {
         setLoading(false);
       }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 import { getWeather } from '@/lib/getWeather';
-import { devOnly } from '@/lib/devonly';
+import { logProd } from '@/lib/logProd';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
       weather: weatherData,
     });
   } catch (err) {
-    devOnly(() => console.error(err));
+    logProd(`Weather API error for city="${city}", country="${country}":`, err);
 
     return NextResponse.json(
       { error: 'Failed to fetch weather' },

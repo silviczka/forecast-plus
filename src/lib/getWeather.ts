@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { devOnly } from './devonly';
+import { logProd } from './logProd';
 
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 
@@ -9,7 +9,7 @@ export async function getWeather(lat: number, lon: number) {
     const res = await axios.get(url);
     return res.data;
   } catch (err) {
-    devOnly(() => console.error('Failed to fetch weather:', err));
+    logProd(`Failed to fetch weather for lat=${lat}, lon=${lon}:`, err);
     throw err;
   }
 }
