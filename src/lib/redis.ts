@@ -1,7 +1,7 @@
 import { Redis as UpstashRedis } from '@upstash/redis';
 import Redis from 'ioredis';
 
-let redisClient: any;
+let redisClient: UpstashRedis | Redis;
 
 if (process.env.NODE_ENV === 'production') {
   // Upstash for production
