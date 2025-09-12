@@ -7,7 +7,7 @@ const WINDOW = 60 * 60; // seconds for Redis
 export async function checkRateLimitRedis(ip: string) {
   try {
     const key = `rate:${ip}`;
-    let count = parseInt((await redis.get(key)) || '0');
+    const count = parseInt((await redis.get(key)) || '0');
 
     if (count >= LIMIT) return false;
 

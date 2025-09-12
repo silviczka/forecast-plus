@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import type { Redis as IORedisClient } from 'ioredis';
 import redis from '../redis';
 import { checkRateLimitRedis } from '../rateLimit';
 import { getLocalFallbackFact } from '../fallbackFunFacts/localFallbackFunFacts';
@@ -25,7 +26,7 @@ export async function getFactForKeyword(ip: string, keyword: string) {
   // Try flushing local buffer if Redis is available
   devOnly(() => {
     if (redisUp && hasLocalBufferData()) {
-      flushBufferToRedis(redis).catch((err) =>
+      flushBufferToRedis(redis as IORedisClient).catch((err) =>
         console.error('Could not flush local buffer:', err.message),
       );
     }
@@ -36,13 +37,20 @@ export async function getFactForKeyword(ip: string, keyword: string) {
   if (redisUp) {
     try {
       allowed = await checkRateLimitRedis(ip);
-    } catch (err: any) {
-      devOnly(() =>
-        console.error(
-          'Redis unavailable for rate limit, using local buffer:',
-          err.message,
-        ),
-      );
+    } catch (err: unknown) {
+      devOnly(() => {
+        if (err instanceof Error) {
+          console.error(
+            'Redis unavailable for rate limit, using local buffer:',
+            err.message,
+          );
+        } else {
+          console.error(
+            'Redis unavailable for rate limit, unknown error:',
+            err,
+          );
+        }
+      });
       allowed = checkLocalRateLimit(ip, 3, 60 * 60 * 1000); // fallback
     }
   } else {
@@ -62,8 +70,14 @@ export async function getFactForKeyword(ip: string, keyword: string) {
     try {
       const cached = await redis.get(cacheKey);
       if (cached) return { text: cached, rateLimited: false };
-    } catch (err: any) {
-      devOnly(() => console.error('Redis cache get failed:', err.message));
+    } catch (err: unknown) {
+      devOnly(() => {
+        if (err instanceof Error) {
+          console.error('Redis cache get failed:', err.message);
+        } else {
+          console.error('Redis cache get failed with unknown error:', err);
+        }
+      });
     }
   }
 
@@ -81,10 +95,14 @@ export async function getFactForKeyword(ip: string, keyword: string) {
     text = response.choices?.[0]?.message?.content?.trim() ?? '';
     if (!/[.!?]$/.test(text)) text += '.';
     fromOpenAI = true;
-  } catch (err: any) {
-    devOnly(() =>
-      console.error('OpenAI failed, using local fallback:', err.message),
-    );
+  } catch (err: unknown) {
+    devOnly(() => {
+      if (err instanceof Error) {
+        console.error('OpenAI failed, using local fallback:', err.message);
+      } else {
+        console.error('OpenAI failed with unknown error:', err);
+      }
+    });
     text = getLocalFallbackFact(ip);
   }
 
@@ -92,20 +110,33 @@ export async function getFactForKeyword(ip: string, keyword: string) {
   if (redisUp) {
     try {
       await redis.set(cacheKey, text, 'EX', 60 * 60);
-    } catch (err: any) {
-      devOnly(() => console.error('Redis cache set failed:', err.message));
+    } catch (err: unknown) {
+      devOnly(() => {
+        if (err instanceof Error) {
+          console.error('Redis cache set failed:', err.message);
+        } else {
+          console.error('Redis cache set failed with unknown error:', err);
+        }
+      });
     }
 
     if (fromOpenAI) {
       try {
         await addRedisFallbackFact(keyword, text);
-      } catch (err: any) {
-        devOnly(() =>
-          console.error(
-            'Redis fallback store failed, saving to buffer:',
-            err.message,
-          ),
-        );
+      } catch (err: unknown) {
+        devOnly(() => {
+          if (err instanceof Error) {
+            console.error(
+              'Redis fallback store failed, saving to buffer:',
+              err.message,
+            );
+          } else {
+            console.error(
+              'Redis fallback store failed with unknown error:',
+              err,
+            );
+          }
+        });
         devOnly(() => saveToLocalBuffer(keyword, text));
       }
     }

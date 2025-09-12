@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { devOnly } from '../devonly';
+import type { Redis } from 'ioredis';
 
 const bufferFile = path.join(process.cwd(), 'fallbackBuffer.json');
 
@@ -23,7 +24,7 @@ export function saveToLocalBuffer(keyword: string, fact: string) {
   }
 }
 
-export async function flushBufferToRedis(redis: any) {
+export async function flushBufferToRedis(redis: Redis) {
   try {
     const raw = fs.readFileSync(bufferFile, 'utf8');
     const arr: { keyword: string; fact: string }[] = JSON.parse(raw);
