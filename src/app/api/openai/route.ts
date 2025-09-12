@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFactForKeyword } from '@/lib/service/factService';
 import { getLocalFallbackFact } from '@/lib/fallbackFunFacts/localFallbackFunFacts';
-import { devOnly } from '@/lib/devonly';
+import { logProd } from '@/lib/logProd';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,10 +13,18 @@ export async function POST(req: NextRequest) {
     const factData = await getFactForKeyword(ip, keyword);
     return NextResponse.json(factData);
   } catch (err) {
-    devOnly(() => console.error('Unexpected error:', err));
+    logProd('Unexpected error:', err);
     return NextResponse.json(
       { text: getLocalFallbackFact('global'), rateLimited: false },
       { status: 200 },
     );
   }
+}
+export async function GET(req: NextRequest) {
+  return NextResponse.json(
+    {
+      text: 'GET method not allowed. Please use POST with { keyword } in the body.',
+    },
+    { status: 405 },
+  );
 }

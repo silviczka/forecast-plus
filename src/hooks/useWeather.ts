@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { devOnly } from '@/lib/devonly';
+import { logProd } from '@/lib/logProd';
 
 export function useWeather(city: string, country: string) {
   const [data, setData] = useState<ApiResponse | null>(null);
@@ -21,7 +21,10 @@ export function useWeather(city: string, country: string) {
         setData(res.data);
         setError(null);
       } catch (err) {
-        devOnly(() => console.error('Weather fetch error:', err));
+        logProd(
+          `Weather fetch error for city="${city}", country="${country}":`,
+          err,
+        );
         setError('Failed to load weather data');
         setData(null);
       } finally {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
-import { devOnly } from '@/lib/devonly';
+import { logProd } from '@/lib/logProd';
 
 const GIPHY_API_KEY = process.env.GIPHY_API_KEY;
 
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ gifs });
   } catch (err) {
-    devOnly(() => console.error(err));
+    logProd('Giphy fetch error:', err);
 
     return NextResponse.json({ gifs: [] }, { status: 500 });
   }

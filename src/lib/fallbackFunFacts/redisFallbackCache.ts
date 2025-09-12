@@ -1,4 +1,5 @@
 import { devOnly } from '../devonly';
+import { logProd } from '../logProd';
 import redis from '../redis';
 import { getLocalFallbackFact } from './localFallbackFunFacts';
 
@@ -7,10 +8,14 @@ import { getLocalFallbackFact } from './localFallbackFunFacts';
  */
 export async function addRedisFallbackFact(keyword: string, fact: string) {
   const fallbackKey = `fallback:${keyword}`;
-  await redis.lpush(fallbackKey, fact);
-  await redis.ltrim(fallbackKey, 0, 3999); // keep 4000 facts
-  // optional: set expiration
-  // await redis.expire(fallbackKey, 24 * 60 * 60); // 24h
+  try {
+    await redis.lpush(fallbackKey, fact);
+    await redis.ltrim(fallbackKey, 0, 3999); // keep 4000 facts
+    // optional: set expiration
+    // await redis.expire(fallbackKey, 24 * 60 * 60); // 24h
+  } catch (err) {
+    logProd('Failed to add fallback fact to Redis:', err);
+  }
 }
 
 /**
@@ -25,10 +30,11 @@ export async function getRedisFallbackFact(keyword: string, ip: string) {
       const randomFact = facts[Math.floor(Math.random() * facts.length)];
       return randomFact;
     }
-  } catch (err) {
-    devOnly(() =>
-      console.error('Redis fallback error, using static fallback', err),
+    logProd(
+      `Redis fallback empty for keyword "${keyword}", using local static fallback.`,
     );
+  } catch (err) {
+    logProd('Redis fallback error, using local static fallback:', err);
   }
 
   // Redis empty or failed → use static fallback

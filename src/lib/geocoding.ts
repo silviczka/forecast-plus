@@ -1,4 +1,4 @@
-import { devOnly } from './devonly';
+import { logProd } from './logProd';
 
 export const fetchSuggestions = async (query: string) => {
   if (!query) return [];
@@ -9,10 +9,10 @@ export const fetchSuggestions = async (query: string) => {
       )}&count=10&language=en&format=json`,
     );
     const data = await res.json();
-    console.log(data.results);
+    logProd(data.results);
     return data.results || [];
   } catch (err) {
-    devOnly(() => console.error('Failed to fetch suggestions', err));
+    logProd(`Failed to fetch suggestions for query="${query}":`, err);
     return [];
   }
 };
