@@ -47,3 +47,6 @@ interface WeatherIconProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
+interface WeatherEffectsProps {
+  weatherKeyword: string; // the text from getWeatherKeywords
+}

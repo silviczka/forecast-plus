@@ -22,7 +22,7 @@ export default function WeatherCard({
       {loading ? (
         <Spinner />
       ) : (
-        <h2 className="font-semibold py-2" role="heading" aria-level={2}>
+        <h2 className="font-semibold pb-2" role="heading" aria-level={2}>
           {location}
         </h2>
       )}

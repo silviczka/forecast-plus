@@ -9,6 +9,7 @@ import { getWeatherKeywords } from '@/lib/weatherKeywords';
 import WeatherFunFact from '@/components/OpenAiText';
 import { useKeyboardNavigation } from '@/hooks/keyboardNav';
 import { useWeather } from '@/hooks/useWeather';
+import WeatherEffects from '@/components/WeatherEffects';
 
 export default function Home() {
   const [query, setQuery] = useState('');
@@ -49,8 +50,9 @@ export default function Home() {
   );
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-r from-blue-400 via-purple-400 to-orange-400 animate-gradient-slow z-0">
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-r from-blue-700 via-purple-700 to-orange-800 animate-gradient-slow z-0">
       <h1 className="text-3xl font-bold mb-4 ">🌦 Forecast Plus</h1>
+      <WeatherEffects weatherKeyword={display} />
       {/* Autocomplete input */}
       <div className="relative w-64 py-5">
         <input
