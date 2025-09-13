@@ -5,7 +5,6 @@ export default function WeatherFunFact({ keyword }: { keyword: string }) {
   const [fact, setFact] = useState<string>('');
   const [lastKeyword, setLastKeyword] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [retryCount, setRetryCount] = useState<number>(0);
 
   useEffect(() => {
     // Prevent duplicate fetch if keyword hasn't changed
@@ -15,7 +14,7 @@ export default function WeatherFunFact({ keyword }: { keyword: string }) {
       setLoading(true);
       setFact(''); // reset while loading
       try {
-        logProd(`Attempting to fetch fact for keyword: "${keyword}" (attempt ${retryCount + 1})`);
+        logProd(`Attempting to fetch fact for keyword: "${keyword}"`);
         const res = await fetch('/api/openai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -31,19 +30,16 @@ export default function WeatherFunFact({ keyword }: { keyword: string }) {
         const data = await res.json();
         setFact(data.text);
         setLastKeyword(keyword);
-        setRetryCount(0); // Reset retry count on success
       } catch (err) {
         logProd(`Failed to fetch fun fact for keyword="${keyword}":`, err);
-        // Reset lastKeyword on error so it can retry
-        setLastKeyword(null);
-        setRetryCount(prev => prev + 1);
+        // Don't reset lastKeyword on error - let it retry when keyword changes
       } finally {
         setLoading(false);
       }
     };
 
     fetchFact();
-  }, [keyword, lastKeyword, retryCount]);
+  }, [keyword, lastKeyword]);
 
   return (
     <div className="mt-2 italic text-white w-full sm:w-1/2 max-w-md text-center">
