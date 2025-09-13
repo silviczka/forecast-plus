@@ -17,7 +17,7 @@ export default function WeatherCard({
     );
   }
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 shadow-lg shadow-gray-900/50 rounded-xl p-6 border border-gray-700 hover:shadow-xl hover:shadow-gray-900/60 transition-all duration-300">
+    <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 shadow-lg shadow-gray-900/50 rounded-xl p-6  hover:shadow-xl hover:shadow-gray-900/60 transition-all duration-300">
       {/* Header with weather icon , location and condition */}
       {loading ? (
         <Spinner />
