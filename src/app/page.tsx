@@ -18,8 +18,13 @@ export default function Home() {
   const [debouncedQuery] = useDebounce(query, 300); // wait 300ms after typing
   const { data, error, loading } = useWeather(city, country);
   const { display, search } = getWeatherKeywords(data);
+  const [skipFetch, setSkipFetch] = useState(false);
 
   useEffect(() => {
+    if (skipFetch) {
+      setSkipFetch(false);
+      return;
+    }
     const fetch = async () => {
       if (!debouncedQuery) return setSuggestions([]);
       if (debouncedQuery === `${city}, ${country}`) return setSuggestions([]);
@@ -35,14 +40,20 @@ export default function Home() {
     setCity(s.name);
     setCountry(s.country);
     setQuery(s.name + ', ' + s.country);
-
     setSuggestions([]);
+    setSkipFetch(true);
   };
   const { activeIndex, handleKeyDown } = useKeyboardNavigation(
     suggestions,
     handleSelect,
   );
-
+  function Spinner() {
+    return (
+      <div className="flex justify-center items-center mt-6">
+        <div className="w-8 h-8 border-4 border-gray-400-500 border-dashed rounded-full animate-spin"></div>
+      </div>
+    );
+  }
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8">
       <h1 className="text-3xl font-bold mb-4">🌦 Forecast Plus</h1>
@@ -84,15 +95,19 @@ export default function Home() {
           </ul>
         )}
       </div>
-
-      {loading && <p className="mt-6">Loading...</p>}
+      {loading ? (
+        <Spinner />
+      ) : (
+        data && (
+          <h2 className="text-xl font-semibold mb-2 mt-6">
+            {data.location.name}, {data.location.country}
+          </h2>
+        )
+      )}
       {error && <p className="mt-6 text-red-500">{error}</p>}
 
       {data && (
         <>
-          <h2 className="text-xl font-semibold mb-2 mt-6">
-            {data.location.name}, {data.location.country}
-          </h2>
           <WeatherCard
             temperature={data.weather.hourly.temperature_2m[0]}
             humidity={data.weather.hourly.relative_humidity_2m[0]}

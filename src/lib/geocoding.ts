@@ -9,8 +9,19 @@ export const fetchSuggestions = async (query: string) => {
       )}&count=10&language=en&format=json`,
     );
     const data = await res.json();
-    logProd(data.results);
-    return data.results || [];
+
+    const results: Suggestion[] = data.results || [];
+    //remove dupes if city has multiple weather stations
+    const uniqueResults = results.filter(
+      (v, i, a) =>
+        a.findIndex(
+          (t) =>
+            t.name.toLowerCase() === v.name.toLowerCase() &&
+            t.country.toLowerCase() === v.country.toLowerCase(),
+        ) === i,
+    );
+    logProd(uniqueResults);
+    return uniqueResults || [];
   } catch (err) {
     logProd(`Failed to fetch suggestions for query="${query}":`, err);
     return [];
