@@ -45,11 +45,11 @@ export default function GiphyDisplay({ weatherData }: WeatherDataProps) {
         <img
           src={selectedGif.url}
           alt={selectedGif.title || 'Weather GIF'}
-          className="h-80 w-auto  rounded object-cover"
-          loading="lazy"
+          className="h-50 0 w-auto  rounded object-cover"
+          // loading="lazy"
         />
       </div>
-      <h3 className="font-semibold mb-2">(Powered by GIPHY)</h3>
+      <p className="text-xs font-size mb-2">(Powered by GIPHY)</p>
     </div>
   );
 }

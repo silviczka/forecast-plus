@@ -7,17 +7,19 @@ export function getWeatherKeywords(weatherData: ApiResponse | null) {
   const localHour = now.getHours();
   let timeOfDay = '';
   if (localHour >= 5 && localHour < 9) {
-    timeOfDay = 'Morning';
+    timeOfDay = 'morning';
   } else if (localHour >= 9 && localHour < 18) {
-    timeOfDay = 'Day';
+    timeOfDay = 'day';
   } else if (localHour >= 18 && localHour < 21) {
-    timeOfDay = 'Evening';
+    timeOfDay = 'evening';
   } else {
-    timeOfDay = 'Night';
+    timeOfDay = 'night';
   }
+  const capitalizeWords = (str: string) =>
+    str.replace(/\b\w/g, (c) => c.toUpperCase());
 
   const code = weatherData.weather.hourly.weather_code?.[localHour] ?? 0;
-  const mappedKeyword = weatherCodeMap[code] || 'Weather';
+  const mappedKeyword = capitalizeWords(weatherCodeMap[code] || 'Weather');
 
   const display = `${mappedKeyword} (${timeOfDay})`; // for WeatherCard
   const search = `${mappedKeyword} ${timeOfDay}`; // for Giphy and AI search
