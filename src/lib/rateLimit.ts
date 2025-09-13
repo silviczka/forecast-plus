@@ -1,7 +1,7 @@
 import { logProd } from './logProd';
 import redis from './redis';
 
-const LIMIT = 7;
+const LIMIT = 10;
 const WINDOW = 60 * 60; // seconds for Redis
 
 export async function checkRateLimitRedis(ip: string) {
