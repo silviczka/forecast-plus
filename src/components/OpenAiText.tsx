@@ -20,13 +20,13 @@ export default function WeatherFunFact({ keyword }: { keyword: string }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ keyword }),
         });
-        
+
         logProd(`Response status: ${res.status} for keyword: "${keyword}"`);
-        
+
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
-        
+
         const data = await res.json();
         setFact(data.text);
         setLastKeyword(keyword);
@@ -42,12 +42,16 @@ export default function WeatherFunFact({ keyword }: { keyword: string }) {
   }, [keyword, lastKeyword]);
 
   return (
-    <div className="mt-2 italic text-white w-full sm:w-1/2 max-w-md text-center">
-      {loading ? (
-        <div className="h-20 bg-gray-700 rounded animate-pulse mx-auto" />
-      ) : (
-        fact && <p className="italic text-white">{fact}</p>
-      )}
+    <div className="flex flex-col  h-40 w-120 items-center justify-start p-2">
+      <h2 className="text-xl font-semibold mb-2 mt-3">Fun Fact:</h2>
+
+      <div className="mt-2 text-white w-full px-4 text-center">
+        {loading ? (
+          <div className="h-25 bg-gray-700 rounded animate-pulse mx-auto" />
+        ) : (
+          fact && <p className=" flex-wrap  text-white">{fact}</p>
+        )}
+      </div>
     </div>
   );
 }

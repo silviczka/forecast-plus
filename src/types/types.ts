@@ -30,6 +30,8 @@ type WeatherCardProps = {
   temperature: number;
   humidity: number;
   keyword: string;
+  location: string;
+  loading: boolean;
 };
 type RateLimitEntry = { count: number; windowStart: number };
 
@@ -39,4 +41,9 @@ interface GiphyItem {
     fixed_height: { url: string };
   };
   title: string;
+}
+interface WeatherIconProps {
+  keyword: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  className?: string;
 }
