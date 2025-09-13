@@ -50,7 +50,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-r from-blue-400 via-purple-400 to-orange-400 animate-gradient-slow z-0">
-      <h1 className="text-3xl font-bold mb-4">🌦 Forecast Plus</h1>
+      <h1 className="text-3xl font-bold mb-4 ">🌦 Forecast Plus</h1>
       {/* Autocomplete input */}
       <div className="relative w-64 py-5">
         <input
@@ -58,7 +58,7 @@ export default function Home() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="w-full border px-3 py-2 rounded"
+          className="w-full border px-3 py-2 rounded bg-black/30"
           aria-label="Search city for weather forecast"
           placeholder="Enter city"
         />

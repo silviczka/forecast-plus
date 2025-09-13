@@ -42,8 +42,8 @@ export default function WeatherFunFact({ keyword }: { keyword: string }) {
   }, [keyword, lastKeyword]);
 
   return (
-    <div className="flex flex-col  h-40 w-120 items-center justify-start p-2">
-      <h2 className="text-xl font-semibold mb-2 mt-3">Fun Fact:</h2>
+    <div className="flex flex-col h-auto sm:h-40 w-full sm:w-120 items-center justify-start p-2">
+      <h2 className="text-xl font-semibold mb-2 mt-1">Fun Fact:</h2>
 
       <div className="mt-2 text-white w-full px-4 text-center">
         {loading ? (
