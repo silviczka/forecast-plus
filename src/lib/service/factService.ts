@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
-import type { Redis as IORedisClient } from 'ioredis';
+import type { Redis as IORedisClient, Redis } from 'ioredis';
 import redis from '../redis';
+import { Redis as UpstashRedis } from '@upstash/redis';
 import { checkRateLimitRedis } from '../rateLimit';
 import { getLocalFallbackFact } from '../fallbackFunFacts/localFallbackFunFacts';
 import {
@@ -16,6 +17,16 @@ import { checkLocalRateLimit } from '../fallbackFunFacts/localRateLimit';
 import { ensureRedisUp } from './redisService';
 import { devOnly } from '../devonly';
 import { logProd } from '../logProd';
+
+function isUpstashRedis(client: unknown): client is UpstashRedis {
+  return (
+    client !== null &&
+    typeof client === 'object' &&
+    'set' in client &&
+    typeof (client as UpstashRedis).set === 'function' &&
+    'token' in (client as UpstashRedis)
+  );
+}
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -103,7 +114,13 @@ export async function getFactForKeyword(ip: string, keyword: string) {
   // --- SAVE TO CACHE / FALLBACK ---
   if (redisUp) {
     try {
-      await redis.set(cacheKey, text, 'EX', 60 * 60);
+      // Upstash for prod
+      if (isUpstashRedis(redis)) {
+        await redis.set(cacheKey, text, { ex: 60 * 60 });
+      } else {
+        // ioredis for local Docker
+        await (redis as Redis).set(cacheKey, text, 'EX', 60 * 60);
+      }
     } catch (err: unknown) {
       logProd('Redis cache set failed:', err);
     }
