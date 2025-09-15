@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFactForKeyword } from '@/lib/service/factService';
-import { getLocalFallbackFact } from '@/lib/fallbackFunFacts/localFallbackFunFacts';
+import { getLocalFallbackFact } from '@/lib/local/localFallbackFunFacts';
 import { logProd } from '@/lib/logProd';
 
 export async function POST(req: NextRequest) {
@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     logProd('POST request received to /api/openai');
     logProd(`Request URL: ${req.url}`);
     logProd(`Request method: ${req.method}`);
-    
+
     const ipHeader = req.headers.get('x-forwarded-for');
     const ip = ipHeader ? ipHeader.split(',')[0].trim() : 'local';
 
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   logProd('GET request received to /api/openai - this should not happen');
   logProd(`Request URL: ${req.url}`);
   logProd(`Request method: ${req.method}`);
-  
+
   return NextResponse.json(
     {
       text: 'GET method not allowed. Please use POST with { keyword } in the body.',

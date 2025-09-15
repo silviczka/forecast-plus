@@ -1,6 +1,9 @@
 import { logProd } from '../logProd';
-import redisClient from '../redis';
-import { isRedisAvailable, checkRedisAvailability } from '../redisAvailability';
+import redisClient from '../redis/redis';
+import {
+  isRedisAvailable,
+  checkRedisAvailability,
+} from '../redis/redisAvailability';
 
 export async function ensureRedisUp() {
   try {

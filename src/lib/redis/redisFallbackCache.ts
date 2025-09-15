@@ -1,7 +1,7 @@
 import { devOnly } from '../devonly';
 import { logProd } from '../logProd';
-import redis from '../redis';
-import { getLocalFallbackFact } from './localFallbackFunFacts';
+import redis from './redis';
+import { getLocalFallbackFact } from '../local/localFallbackFunFacts';
 
 /**
  * Add a new fact to Redis for a keyword.
