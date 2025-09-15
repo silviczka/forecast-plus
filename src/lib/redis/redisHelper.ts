@@ -6,7 +6,6 @@ export function isUpstashRedis(client: unknown): client is UpstashRedis {
     client !== null &&
     typeof client === 'object' &&
     'set' in client &&
-    typeof (client as UpstashRedis).set === 'function' &&
-    'token' in (client as UpstashRedis)
+    typeof (client as UpstashRedis).set === 'function'
   );
 }
