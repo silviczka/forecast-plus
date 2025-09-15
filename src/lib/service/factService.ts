@@ -81,13 +81,20 @@ export async function getFactForKeyword(ip: string, keyword: string) {
     logProd(`Fun fact for keyword "${keyword}" fetched:`, text);
     fromOpenAI = true;
   } catch (err: unknown) {
-    const safeMessage =
-      (err as any)?.message?.replace(/(sk-[A-Za-z0-9]+)/g, '***API_KEY***') ??
-      'Unknown error';
-    const stack = (err as any)?.stack ?? '';
+    let safeMessage = 'Unknown error';
+    let stack = '';
+
+    if (err instanceof Error) {
+      // Mask OpenAI API keys if present
+      safeMessage = err.message.replace(/(sk-[A-Za-z0-9]+)/g, '***API_KEY***');
+      stack = err.stack ?? '';
+    } else if (typeof err === 'string') {
+      safeMessage = err;
+    }
+
     logProd('OpenAI call failed, using local fallback', {
       message: safeMessage,
-      stack: stack,
+      stack,
     });
 
     text = getLocalFallbackFact(ip);
