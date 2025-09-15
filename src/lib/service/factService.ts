@@ -81,7 +81,15 @@ export async function getFactForKeyword(ip: string, keyword: string) {
     logProd(`Fun fact for keyword "${keyword}" fetched:`, text);
     fromOpenAI = true;
   } catch (err: unknown) {
-    logProd('OpenAI call failed, using local fallback:', err);
+    const safeMessage =
+      (err as any)?.message?.replace(/(sk-[A-Za-z0-9]+)/g, '***API_KEY***') ??
+      'Unknown error';
+    const stack = (err as any)?.stack ?? '';
+    logProd('OpenAI call failed, using local fallback', {
+      message: safeMessage,
+      stack: stack,
+    });
+
     text = getLocalFallbackFact(ip);
   }
 
