@@ -6,8 +6,8 @@ let redisClient: UpstashRedis | Redis;
 if (process.env.NODE_ENV === 'production') {
   // Upstash for production
   redisClient = new UpstashRedis({
-    url: process.env.REDIS_URL!,
-    token: process.env.REDIS_TOKEN!,
+    url: process.env.UPSTASH_URL!,
+    token: process.env.UPSTASH_TOKEN!,
   });
 } else {
   // Docker Redis locally
