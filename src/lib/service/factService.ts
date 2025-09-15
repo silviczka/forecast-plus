@@ -1,32 +1,22 @@
 import OpenAI from 'openai';
 import type { Redis as IORedisClient, Redis } from 'ioredis';
-import redis from '../redis';
-import { Redis as UpstashRedis } from '@upstash/redis';
-import { checkRateLimitRedis } from '../rateLimit';
-import { getLocalFallbackFact } from '../fallbackFunFacts/localFallbackFunFacts';
+import redis from '../redis/redis';
+import { isUpstashRedis } from '../redis/redisHelper';
+import { checkRateLimitRedis } from '../redis/redisRateLimit';
+import { getLocalFallbackFact } from '../local/localFallbackFunFacts';
 import {
   addRedisFallbackFact,
   getRedisFallbackFact,
-} from '../fallbackFunFacts/redisFallbackCache';
+} from '../redis/redisFallbackCache';
 import {
   saveToLocalBuffer,
   flushBufferToRedis,
   hasLocalBufferData,
-} from '../fallbackFunFacts/localBuffer';
-import { checkLocalRateLimit } from '../fallbackFunFacts/localRateLimit';
+} from '../local/localBuffer';
+import { checkLocalRateLimit } from '../local/localRateLimit';
 import { ensureRedisUp } from './redisService';
 import { devOnly } from '../devonly';
 import { logProd } from '../logProd';
-
-function isUpstashRedis(client: unknown): client is UpstashRedis {
-  return (
-    client !== null &&
-    typeof client === 'object' &&
-    'set' in client &&
-    typeof (client as UpstashRedis).set === 'function' &&
-    'token' in (client as UpstashRedis)
-  );
-}
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
