@@ -14,6 +14,12 @@ At its current state, the application shows weather for the current hour and day
   - If a search uses the same keyword as a previous search within the last hour, the same Fun Fact is returned.  
   - If no stored Fun Fact exists for a keyword and 7 fetches per hour were crossed, a static fallback Fun Fact from a file is shown.  
 - **Visual effects:** shadcn UI particle effects show rain, snow, or lightning where relevant.  
+- **Upstash free tier keep-alive:** Upstash archives free DBs after 14 days of inactivity. A Vercel cron runs once per week (Sundays 08:00 UTC), hits `/api/cron/redis-keepalive`, does one Redis `SET` and keeps the DB active. See below how to check that it’s working.
+
+### How to verify the Redis keep-alive cron is working
+
+**Vercel Logs:** Go to [vercel.com](https://vercel.com) → your **Forecast Plus** project → **Logs**. Look for requests to **`/api/cron/redis-keepalive`**. The cron runs every Sunday at 08:00 UTC; after that time you should see a log line for that URL. Click it to see the response (e.g. `{ "ok": true, "at": "2025-03-10T08:00:00.000Z", "key": "keepalive" }`).
+
 
 ### Future Upgrades
 
