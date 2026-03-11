@@ -10,6 +10,8 @@ import WeatherFunFact from '@/components/OpenAiText';
 import { useKeyboardNavigation } from '@/hooks/keyboardNav';
 import { useWeather } from '@/hooks/useWeather';
 import WeatherEffects from '@/components/WeatherEffects';
+import { getPlaceTypeInfo } from '@/lib/placeTypeLabel';
+import type { Suggestion } from '@/types/types';
 
 export default function Home() {
   const [query, setQuery] = useState('');
@@ -36,11 +38,16 @@ export default function Home() {
     fetch();
   }, [debouncedQuery, city, country]);
 
-  useEffect(() => {}, [query]);
+  const suggestionLabel = (s: Suggestion, q: string) =>
+    s.admin3 && q.trim().toLowerCase() === s.admin3.toLowerCase()
+      ? s.admin3
+      : s.name;
+
   const handleSelect = (s: Suggestion) => {
-    setCity(s.name);
+    const displayName = suggestionLabel(s, query);
+    setCity(displayName);
     setCountry(s.country);
-    setQuery(s.name + ', ' + s.country);
+    setQuery(displayName + ', ' + s.country);
     setSuggestions([]);
     setSkipFetch(true);
   };
@@ -73,20 +80,32 @@ export default function Home() {
               scrollbarWidth: 'none',
             }}
           >
-            {suggestions.map((s, i) => (
-              <li
-                key={`${s.name}-${s.country_code}-${s.latitude}-${s.longitude}`}
-              >
-                <button
-                  onClick={() => handleSelect(s)}
-                  className={`px-3 py-2 w-full text-left cursor-pointer ${
-                    i === activeIndex ? 'bg-gray-600' : 'hover:bg-gray-700'
-                  }`}
+            {suggestions.map((s, i) => {
+              const placeType = getPlaceTypeInfo(s.feature_code);
+              return (
+                <li
+                  key={`${s.name}-${s.country_code}-${s.latitude}-${s.longitude}`}
                 >
-                  {s.name}, {s.country}
-                </button>
-              </li>
-            ))}
+                  <button
+                    onClick={() => handleSelect(s)}
+                    className={`px-3 py-2 w-full text-left cursor-pointer flex items-center gap-1.5 ${
+                      i === activeIndex ? 'bg-gray-600' : 'hover:bg-gray-700'
+                    }`}
+                  >
+                    <span className="min-w-0 flex-1">
+                      {suggestionLabel(s, debouncedQuery)}, {s.country}
+                    </span>
+                    <span
+                      className="shrink-0 text-base leading-none"
+                      title={placeType.label}
+                      aria-label={placeType.label}
+                    >
+                      {placeType.emoji}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
