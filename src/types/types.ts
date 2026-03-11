@@ -8,12 +8,29 @@ type ApiResponse = {
     };
   };
 };
-type Suggestion = {
+/** Geocoding API result item (subset used by weather route). */
+export type GeocodingResultItem = {
+  name: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+  feature_code?: string;
+};
+
+export type Suggestion = {
   name: string;
   country: string;
   country_code: string;
   latitude: number;
   longitude: number;
+  /**
+   * Admin level 3 name from GeoNames (e.g. city district).
+   * admin1 = state/region, admin2 = county, admin3 = district – we use admin3 to show
+   * the familiar name (e.g. "Helsinki") when the API returns an alternate (e.g. "Helsingfors").
+   */
+  admin3?: string;
+  /** GeoNames feature_code: PPLC=capital, PPL=place, MT=mountain, AIRP=airport, etc. */
+  feature_code?: string;
 };
 
 type WeatherDataProps = {
@@ -33,7 +50,6 @@ type WeatherCardProps = {
   location: string;
   loading: boolean;
 };
-type RateLimitEntry = { count: number; windowStart: number };
 
 interface GiphyItem {
   id: string;
