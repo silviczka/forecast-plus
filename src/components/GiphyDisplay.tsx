@@ -35,7 +35,11 @@ export default function GiphyDisplay({ weatherData }: WeatherDataProps) {
       }
     };
 
-    fetchGifs();
+    // Defer fetch until after first paint so LCP can be the heading/weather card, not the GIF
+    const rafId = requestAnimationFrame(() => {
+      requestAnimationFrame(() => fetchGifs());
+    });
+    return () => cancelAnimationFrame(rafId);
   }, [weatherData]);
 
   if (!selectedGif) return null;
