@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { getWeatherKeywords } from '@/lib/weatherKeywords';
 import { logProd } from '@/lib/logProd';
+import type { Gif, WeatherDataProps } from '@/types/types';
 
 export default function GiphyDisplay({ weatherData }: WeatherDataProps) {
   const [selectedGif, setSelectedGif] = useState<Gif | null>(null);

@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { Particles } from '@/components/ui/shadcn-io/particles';
+import type { WeatherEffectsProps } from '@/types/types';
 
 export default function WeatherEffects({
   weatherKeyword,

@@ -1,5 +1,7 @@
 'use client';
 
+import type { WeatherIconProps } from '@/types/types';
+
 export default function WeatherIcon({
   keyword,
   size = 'md',

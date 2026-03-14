@@ -1,6 +1,7 @@
 'use client';
 
 import WeatherIcon from './WeatherIcon';
+import type { WeatherCardProps } from '@/types/types';
 
 export default function WeatherCard({
   temperature,

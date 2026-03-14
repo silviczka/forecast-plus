@@ -1,4 +1,5 @@
 import { weatherCodeMap } from './weatherCodeMap';
+import type { ApiResponse } from '@/types/types';
 
 export function getWeatherKeywords(weatherData: ApiResponse | null) {
   if (!weatherData) return { display: 'Weather', search: 'Weather' };

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 import { logProd } from '@/lib/logProd';
+import type { Gif, GiphyItem } from '@/types/types';
 
 const GIPHY_API_KEY = process.env.GIPHY_API_KEY;
 
