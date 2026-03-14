@@ -1,4 +1,5 @@
-type ApiResponse = {
+/** Types below are exported for use in other files; ESLint may report "unused" in this file only. */
+export type ApiResponse = {
   location: { name: string; country: string };
   weather: {
     hourly: {
@@ -33,17 +34,17 @@ export type Suggestion = {
   feature_code?: string;
 };
 
-type WeatherDataProps = {
+export type WeatherDataProps = {
   weatherData: ApiResponse | null;
 };
 
-type Gif = {
+export type Gif = {
   id: string;
   url: string;
   title: string;
 };
 
-type WeatherCardProps = {
+export type WeatherCardProps = {
   temperature: number;
   humidity: number;
   keyword: string;
@@ -51,18 +52,20 @@ type WeatherCardProps = {
   loading: boolean;
 };
 
-interface GiphyItem {
+export interface GiphyItem {
   id: string;
   images: {
     fixed_height: { url: string };
   };
   title: string;
 }
-interface WeatherIconProps {
+
+export interface WeatherIconProps {
   keyword: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
-interface WeatherEffectsProps {
-  weatherKeyword: string; // the text from getWeatherKeywords
+
+export interface WeatherEffectsProps {
+  weatherKeyword: string;
 }

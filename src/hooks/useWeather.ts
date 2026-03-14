@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { logProd } from '@/lib/logProd';
+import type { ApiResponse } from '@/types/types';
 
 export function useWeather(city: string, country: string) {
   const [data, setData] = useState<ApiResponse | null>(null);
