@@ -1,0 +1,3 @@
+# Use LF in the repo so diffs and commits are consistent across Windows/Mac/Linux.
+# Git will convert to/from your OS line endings when you check out/commit.
+* text=auto eol=lf
