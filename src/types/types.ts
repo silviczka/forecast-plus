@@ -45,8 +45,8 @@ export type Gif = {
 };
 
 export type WeatherCardProps = {
-  temperature: number;
-  humidity: number;
+  temperature: number | null;
+  humidity: number | null;
   keyword: string;
   location: string;
   loading: boolean;

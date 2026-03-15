@@ -7,8 +7,9 @@ export default function WeatherIcon({
   size = 'md',
   className = '',
 }: WeatherIconProps) {
-  // Extract the main weather condition (before the time part)
-  const mainCondition = keyword.split(' ')[0].toLowerCase();
+  // Use full condition for matching (e.g. "Heavy Rain (day)" → "heavy rain"); strip trailing (day)/(night) etc.
+  const conditionWithoutTime = keyword.replace(/\s*\([^)]*\)\s*$/, '').trim().toLowerCase();
+  const mainCondition = conditionWithoutTime;
 
   // Size classes
   const sizeClasses = {
@@ -64,8 +65,9 @@ export default function WeatherIcon({
       },
     };
 
-    // Find the best match
-    for (const [key, value] of Object.entries(iconMap)) {
+    // Find the best match (longer keys first so e.g. "heavy freezing rain" matches before "heavy rain")
+    const entries = Object.entries(iconMap).sort(([a], [b]) => b.length - a.length);
+    for (const [key, value] of entries) {
       if (condition.includes(key)) {
         return value;
       }

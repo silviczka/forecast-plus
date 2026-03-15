@@ -13,11 +13,14 @@ import WeatherEffects from '@/components/WeatherEffects';
 import { getPlaceTypeInfo } from '@/lib/placeTypeLabel';
 import type { Suggestion } from '@/types/types';
 
+const DROPDOWN_CLOSE_MS = 220;
+
 export default function Home() {
   const [query, setQuery] = useState('');
   const [city, setCity] = useState('Prague'); // selected city
   const [country, setCountry] = useState('Czechia');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [dropdownClosing, setDropdownClosing] = useState(false);
   const [debouncedQuery] = useDebounce(query, 300); // wait 300ms after typing
   const { data, error, loading } = useWeather(city, country);
   const { display, search } = getWeatherKeywords(data);
@@ -48,16 +51,25 @@ export default function Home() {
     setCity(displayName);
     setCountry(s.country);
     setQuery(displayName + ', ' + s.country);
-    setSuggestions([]);
     setSkipFetch(true);
+    setDropdownClosing(true);
   };
+
+  useEffect(() => {
+    if (!dropdownClosing) return;
+    const id = setTimeout(() => {
+      setSuggestions([]);
+      setDropdownClosing(false);
+    }, DROPDOWN_CLOSE_MS);
+    return () => clearTimeout(id);
+  }, [dropdownClosing]);
   const { activeIndex, handleKeyDown } = useKeyboardNavigation(
     suggestions,
     handleSelect,
   );
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-r from-blue-700 via-purple-700 to-orange-800 animate-gradient-slow z-0">
+    <main className="flex min-h-screen flex-col items-center justify-start pt-12 pb-12 px-8 bg-gradient-to-r from-blue-700 via-purple-700 to-orange-800 animate-gradient-slow z-0">
       <h1 className="text-3xl font-bold mb-4 ">🌦 Forecast Plus</h1>
       <WeatherEffects weatherKeyword={display} />
       {/* Autocomplete input */}
@@ -72,13 +84,16 @@ export default function Home() {
           placeholder="Enter city"
         />
 
-        {/* Suggestions dropdown */}
-        {suggestions.length > 0 && (
+        {/* Suggestions dropdown: smooth close (collapse + fade) before unmount */}
+        {(suggestions.length > 0 || dropdownClosing) && (
           <ul
-            className="absolute bg-gray-800 border rounded w-full mt-1 max-h-40 overflow-y-auto z-10"
+            className={`absolute bg-gray-800/85 border border-white/10 rounded w-full mt-1 z-10 transition-[max-height,opacity] duration-200 ease-out ${
+              dropdownClosing ? 'max-h-0 opacity-0 mt-0 overflow-hidden' : 'max-h-40 opacity-100 overflow-y-auto'
+            }`}
             style={{
               scrollbarWidth: 'none',
             }}
+            aria-hidden={dropdownClosing}
           >
             {suggestions.map((s, i) => {
               const placeType = getPlaceTypeInfo(s.feature_code);
@@ -111,22 +126,20 @@ export default function Home() {
       </div>
       {error && <p className="mt-6 text-red-500">{error}</p>}
 
-      {data && (
-        <>
-          <div className="py-2">
-            <WeatherCard
-              temperature={data.weather.hourly.temperature_2m[0]}
-              humidity={data.weather.hourly.relative_humidity_2m[0]}
-              keyword={display}
-              location={`${data.location.name}, ${data.location.country}`}
-              loading={loading}
-            />
-          </div>
+      {/* Card and Fun Fact always in place from first paint; values fill in when data loads */}
+      <div className="py-2">
+        <WeatherCard
+          temperature={data ? data.weather.hourly.temperature_2m[0] : null}
+          humidity={data ? data.weather.hourly.relative_humidity_2m[0] : null}
+          keyword={display}
+          location={`${city}, ${country}`}
+          loading={loading}
+        />
+      </div>
 
-          <WeatherFunFact keyword={search} />
-          <GiphyDisplay weatherData={data} />
-        </>
-      )}
+      <WeatherFunFact keyword={search} />
+
+      {data && <GiphyDisplay weatherData={data} />}
     </main>
   );
 }
