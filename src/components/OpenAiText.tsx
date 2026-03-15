@@ -7,8 +7,8 @@ export default function WeatherFunFact({ keyword }: { keyword: string }) {
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    // Prevent duplicate fetch if keyword hasn't changed
-    if (!keyword || keyword === lastKeyword) return;
+    // Don't fetch for the default "Weather" placeholder (no data yet) – avoids flash on reload when real keyword loads
+    if (!keyword || keyword === lastKeyword || keyword === 'Weather') return;
 
     const fetchFact = async () => {
       setLoading(true);
@@ -41,16 +41,13 @@ export default function WeatherFunFact({ keyword }: { keyword: string }) {
     fetchFact();
   }, [keyword, lastKeyword]);
 
+  /* Fixed height to fit ~4 lines of OpenAI text; GIF below stays in place. Scroll only if fact is longer. */
   return (
-    <div className="flex flex-col h-auto sm:h-40 w-full sm:w-120 items-center justify-start p-2">
-      <h2 className="text-xl font-semibold mb-2 mt-1">Fun Fact:</h2>
+    <div className="flex flex-col w-full sm:w-120 items-center justify-start p-2 h-[10.5rem]">
+      <h2 className="text-xl font-semibold mb-2 mt-1 shrink-0">Fun Fact:</h2>
 
-      <div className="mt-2 text-white w-full px-4 text-center">
-        {loading ? (
-          <div className="h-25 bg-gray-700 rounded animate-pulse mx-auto" />
-        ) : (
-          fact && <p className=" flex-wrap  text-white">{fact}</p>
-        )}
+      <div className="mt-2 text-white w-full px-4 text-center min-h-0 flex-1 overflow-y-auto">
+        {!loading && fact && <p className="flex-wrap text-white leading-snug">{fact}</p>}
       </div>
     </div>
   );

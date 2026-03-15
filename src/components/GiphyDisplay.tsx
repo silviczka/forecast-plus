@@ -8,14 +8,14 @@ import type { Gif, WeatherDataProps } from '@/types/types';
 
 export default function GiphyDisplay({ weatherData }: WeatherDataProps) {
   const [selectedGif, setSelectedGif] = useState<Gif | null>(null);
-  const [keyword, setKeyword] = useState<string>('weather');
+  const [gifUnavailable, setGifUnavailable] = useState(false);
 
   useEffect(() => {
     if (!weatherData) return;
 
-    const { search } = getWeatherKeywords(weatherData);
-    setKeyword(search);
+    setGifUnavailable(false);
 
+    const { search } = getWeatherKeywords(weatherData);
     const fetchGifs = async () => {
       try {
         const giphyQuery = `${search.replace(/[()]/g, '')} weather`;
@@ -32,6 +32,8 @@ export default function GiphyDisplay({ weatherData }: WeatherDataProps) {
         }
       } catch (err) {
         logProd(`Failed to fetch Giphy GIFs for query="${search}":`, err);
+        setSelectedGif(null);
+        setGifUnavailable(true);
       }
     };
 
@@ -42,16 +44,27 @@ export default function GiphyDisplay({ weatherData }: WeatherDataProps) {
     return () => cancelAnimationFrame(rafId);
   }, [weatherData]);
 
+  if (gifUnavailable) {
+    return (
+      <div className="mt-3 flex flex-col items-center gap-2 text-center text-white/80 text-sm px-4">
+        <p>Weather GIF temporarily unavailable.</p>
+        <p className="text-xs">(Powered by GIPHY)</p>
+      </div>
+    );
+  }
+
   if (!selectedGif) return null;
 
   return (
-    <div className="mt-6 flex flex-col items-center gap-2">
-      <div className="flex justify-center gap-2 overflow-x-auto">
+    <div className="mt-3 flex flex-col items-center gap-2">
+      {/* Fixed-size container reserves space (CLS); object-contain keeps GIF aspect ratio, no stretch/crop; no background */}
+      <div className="flex justify-center w-[320px] h-[320px] rounded overflow-hidden">
         <img
           src={selectedGif.url}
           alt={selectedGif.title || 'Weather GIF'}
-          className="h-50 0 w-auto  rounded object-cover"
-          // loading="lazy"
+          width={320}
+          height={320}
+          className="w-full h-full rounded object-contain object-top"
         />
       </div>
       <p className="text-xs font-size mb-2">(Powered by GIPHY)</p>

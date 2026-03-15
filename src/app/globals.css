@@ -44,3 +44,11 @@ body {
   background-size: 200% 200%;
   animation: gradient-slow 45s ease infinite;
 }
+
+/* Hide scrollbar everywhere (page + scrollable areas); scrolling still works (wheel, touch) */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
