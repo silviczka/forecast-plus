@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import WeatherCard from '@/components/WeatherCard';
 import { fetchSuggestions } from '@/lib/geocoding';
@@ -25,6 +25,7 @@ export default function Home() {
   const { data, error, loading } = useWeather(city, country);
   const { display, search } = getWeatherKeywords(data);
   const [skipFetch, setSkipFetch] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (skipFetch) {
@@ -52,6 +53,7 @@ export default function Home() {
     setCountry(s.country);
     setQuery(displayName + ', ' + s.country);
     setSkipFetch(true);
+    searchInputRef.current?.focus();
     setDropdownClosing(true);
   };
 
@@ -75,6 +77,7 @@ export default function Home() {
       {/* Autocomplete input */}
       <div className="relative w-64 py-5">
         <input
+          ref={searchInputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
