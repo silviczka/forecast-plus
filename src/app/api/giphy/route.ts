@@ -20,7 +20,7 @@ export async function GET(req: Request) {
       params: {
         api_key: GIPHY_API_KEY,
         q: keyword,
-        limit: 5,
+        limit: 20, // decided here on the server, never by the browser
         rating: 'pg', // safe content
       },
     });

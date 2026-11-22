@@ -15,23 +15,27 @@ export default function GiphyDisplay({ weatherData }: WeatherDataProps) {
 
     setGifUnavailable(false);
 
-    const { search } = getWeatherKeywords(weatherData);
+    const { gifQuery, gifTerm } = getWeatherKeywords(weatherData);
+    // Safety net: if a search finds nothing, try a simpler one ("cloudy night" -> "cloudy" -> "weather")
+    const queries = [...new Set([gifQuery, gifTerm, 'weather'])];
+
     const fetchGifs = async () => {
       try {
-        const giphyQuery = `${search.replace(/[()]/g, '')} weather`;
-        const res = await axios.get(
-          `/api/giphy?q=${encodeURIComponent(giphyQuery)}&limit=25`,
-        );
-        const gifs: Gif[] = res.data.gifs || [];
-
-        if (gifs.length > 0) {
-          const randomIndex = Math.floor(Math.random() * gifs.length);
-          setSelectedGif(gifs[randomIndex]);
-        } else {
-          setSelectedGif(null);
+        for (const query of queries) {
+          const res = await axios.get(`/api/giphy?q=${encodeURIComponent(query)}`);
+          const gifs: Gif[] = res.data.gifs || [];
+          if (gifs.length > 0) {
+            const randomIndex = Math.floor(Math.random() * gifs.length);
+            setSelectedGif(gifs[randomIndex]);
+            return;
+          }
+          logProd(`No GIFs for query="${query}", trying a simpler one`);
         }
+        // Every search came back empty
+        setSelectedGif(null);
+        setGifUnavailable(true);
       } catch (err) {
-        logProd(`Failed to fetch Giphy GIFs for query="${search}":`, err);
+        logProd(`Failed to fetch Giphy GIFs for query="${gifQuery}":`, err);
         setSelectedGif(null);
         setGifUnavailable(true);
       }
