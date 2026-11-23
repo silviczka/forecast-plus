@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getFactForKeyword } from '@/lib/service/factService';
 import { getLocalFallbackFact } from '@/lib/local/localFallbackFunFacts';
 import { logProd } from '@/lib/logProd';
+import { isAllowedFactKeyword } from '@/lib/allowlist';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,6 +14,11 @@ export async function POST(req: NextRequest) {
     const ip = ipHeader ? ipHeader.split(',')[0].trim() : 'local';
 
     const { keyword } = await req.json();
+
+    // Allowlist: only keywords the page itself generates ever reach OpenAI (blocks prompt injection)
+    if (!isAllowedFactKeyword(keyword)) {
+      return NextResponse.json({ error: 'Unknown keyword' }, { status: 400 });
+    }
     logProd('Keyword received:', keyword);
 
     const factData = await getFactForKeyword(ip, keyword);

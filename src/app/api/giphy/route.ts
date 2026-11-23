@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 import { logProd } from '@/lib/logProd';
+import { isAllowedGifQuery } from '@/lib/allowlist';
 import type { Gif, GiphyItem } from '@/types/types';
 
 const GIPHY_API_KEY = process.env.GIPHY_API_KEY;
@@ -14,6 +15,11 @@ export async function GET(req: Request) {
   }
   const { searchParams } = new URL(req.url);
   const keyword = searchParams.get('q') || 'weather';
+
+  // Allowlist: only searches the page itself generates, so our key can't be used as a free GIF search
+  if (!isAllowedGifQuery(keyword)) {
+    return NextResponse.json({ gifs: [], error: 'Unknown search' }, { status: 400 });
+  }
 
   try {
     const res = await axios.get('https://api.giphy.com/v1/gifs/search', {

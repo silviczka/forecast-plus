@@ -5,7 +5,7 @@ import type { ApiResponse } from '@/types/types';
  * Everyday word for the GIF search. GIPHY is tagged by people, not meteorologists:
  * "overcast night" finds nothing, "cloudy night" finds plenty.
  */
-function getGifTerm(code: number): string {
+export function getGifTerm(code: number): string {
   if (code <= 1) return 'clear';
   if (code <= 3) return 'cloudy';
   if (code === 45 || code === 48) return 'fog';
