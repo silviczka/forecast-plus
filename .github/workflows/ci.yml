@@ -1,0 +1,49 @@
+name: CI
+
+# Runs on every push to any branch and on pull requests:
+# a broken or vulnerable change shows up here before it reaches users.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+# Least privilege: this workflow only reads the code
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install (exactly what the lockfile says)
+        run: pnpm install --frozen-lockfile
+
+      - name: Known vulnerabilities in production packages
+        run: pnpm audit --prod --audit-level=high
+
+      - name: Type check
+        run: pnpm exec tsc --noEmit
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Production build
+        run: pnpm build
+        env:
+          # Placeholders: real keys live only in Vercel. Nothing is called during the build.
+          OPENAI_API_KEY: placeholder
+          GIPHY_API_KEY: placeholder
+          UPSTASH_URL: https://placeholder.invalid
+          UPSTASH_TOKEN: placeholder
+          NEXT_TELEMETRY_DISABLED: 1

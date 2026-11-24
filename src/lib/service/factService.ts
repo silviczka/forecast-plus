@@ -13,7 +13,6 @@ import {
   flushBufferToRedis,
   hasLocalBufferData,
 } from '../local/localBuffer';
-import { checkLocalRateLimit } from '../local/localRateLimit';
 import { ensureRedisUp } from './redisService';
 import { devOnly } from '../devonly';
 import { logProd } from '../logProd';
@@ -35,17 +34,9 @@ export async function getFactForKeyword(ip: string, keyword: string) {
   });
 
   // --- RATE LIMIT ---
-  let allowed = true;
-  if (redisUp) {
-    try {
-      allowed = await checkRateLimitRedis(ip);
-    } catch (err: unknown) {
-      logProd('Redis unavailable for rate limit, using local fallback:', err);
-      allowed = checkLocalRateLimit(ip, 3, 60 * 60 * 1000); // fallback
-    }
-  } else {
-    allowed = false;
-  }
+  // checkRateLimitRedis never throws: on a Redis error it refuses (fail closed),
+  // so OpenAI is only ever called when the counter is working.
+  const allowed = redisUp ? await checkRateLimitRedis(ip) : false;
 
   if (!allowed) {
     logProd(`Fun fact rate-limited for IP ${ip}, keyword "${keyword}"`);
