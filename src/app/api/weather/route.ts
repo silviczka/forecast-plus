@@ -2,12 +2,24 @@ import { NextResponse } from 'next/server';
 import axios from 'axios';
 import { getWeather } from '@/lib/getWeather';
 import { logProd } from '@/lib/logProd';
+import { getClientIp } from '@/lib/clientIp';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/redis/redisRateLimit';
 import type { GeocodingResultItem } from '@/types/types';
+
+const MAX_NAME_LENGTH = 100; // longest real place names are well under this
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const city = searchParams.get('city') || 'Prague'; // default fallback
   const country = searchParams.get('country') || 'Czechia';
+
+  if (city.length > MAX_NAME_LENGTH || country.length > MAX_NAME_LENGTH) {
+    return NextResponse.json({ error: 'City or country name too long' }, { status: 400 });
+  }
+
+  if (!(await checkRateLimit(getClientIp(request), RATE_LIMITS.weather))) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
 
   try {
     // Geocode city name - lat/lon

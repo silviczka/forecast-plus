@@ -26,7 +26,11 @@ export function useWeather(city: string, country: string) {
           `Weather fetch error for city="${city}", country="${country}":`,
           err,
         );
-        setError('Failed to load weather data');
+        setError(
+          axios.isAxiosError(err) && err.response?.status === 429
+            ? 'Too many searches, please wait a minute and try again'
+            : 'Failed to load weather data',
+        );
         setData(null);
       } finally {
         setLoading(false);
